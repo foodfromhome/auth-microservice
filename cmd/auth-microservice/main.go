@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	fmt.Println("hola amigos")
+	fmt.Println("hola, amigos")
 
 	a, err := app.NewApp()
 	if err != nil {
