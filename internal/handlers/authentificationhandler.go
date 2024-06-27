@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"nolabel-hac-auth-microservice-2024/internal/models"
 	"time"
@@ -19,13 +21,14 @@ func AuthentificationUser(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	HashedPassword := []byte("pkenorngeongren")
 	// Проверяем, соответствует ли введенный пароль хэшу
-	//err = bcrypt.CompareHashAndPassword(HashedPassword, []byte(password))
-	//if err != nil {
-	//	fmt.Println("Пароль не соответствует хэшу:", err)
-	//}
-	//
-	//fmt.Println("Пароль верный!")
+	err = bcrypt.CompareHashAndPassword(HashedPassword, []byte(user.Password))
+	if err != nil {
+		fmt.Println("Неправильный пароль:", err)
+	}
+
+	fmt.Println("Пароль верный! Вход разрешён")
 
 	//secret jwt key generation
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

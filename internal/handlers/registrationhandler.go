@@ -22,7 +22,7 @@ func RegistrationUser(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	//Проверка на то, что пользователя не существует в системе
+	//TO DO: Проверка на то, что пользователя не существует в системе
 
 	//password hashing
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -43,12 +43,11 @@ func RegistrationUser(writer http.ResponseWriter, request *http.Request) {
 
 	tokenString, _ := token.SignedString([]byte("secret_key"))
 
-	writer.Header().Set("Authorization", tokenString)
+	writer.Header().Set("Registration", tokenString)
 
 	writer.Header().Set("Content-Type", "application/json")
 
-	response := "Good, bro"
-	err = json.NewEncoder(writer).Encode(response)
+	err = json.NewEncoder(writer).Encode(models.UserResponse{User: user})
 	if err != nil {
 		print(err)
 	}
