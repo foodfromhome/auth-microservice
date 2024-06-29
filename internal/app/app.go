@@ -24,8 +24,8 @@ func (a *App) HTTPRouter() http.Handler {
 
 	//Функция обработчик
 	router.HandleFunc("/registration", handlers.RegistrationUser).Methods(http.MethodPost)
+	router.HandleFunc("/registrationtest", handlers.GetRegistration).Methods(http.MethodGet)
 	router.HandleFunc("/auth", handlers.AuthentificationUser).Methods(http.MethodPost)
-	router.HandleFunc("/form", handlers.Testing)
 
 	a.router = router
 	return a.router

@@ -1,6 +1,8 @@
-POST localhost:8000/auth
+POST localhost:8000/registration
 Content-Type: application/json
 
 {
-
+  "Email": "ya@ha.ru",
+  "Password": "jneoenen",
+  "Name": "Yevgeniy"
 }
