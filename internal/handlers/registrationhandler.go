@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
-	"io/ioutil"
 	"net/http"
 	"nolabel-hac-auth-microservice-2024/internal/models"
+	"nolabel-hac-auth-microservice-2024/internal/service"
 	"time"
 )
 
@@ -25,19 +25,21 @@ func RegistrationUser(writer http.ResponseWriter, request *http.Request) {
 	//TO DO: Проверка на то, что пользователя не существует в системе
 
 	//password hashing
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
 	if err != nil {
 		fmt.Println("Ошибка при генерации хэша пароля:", err)
 	}
 
-	user.Password = string(hashedPassword)
+	user.PasswordHash = string(hashedPassword)
 	user.Success = true
 
 	//TO DO: add service methods
+	user.RoleName = service.CheckRole(user.RoleName)
 
 	//secret jwt key generation
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email":      user.Email,
+		"operations": user.RoleName.Operations,
 		"expiration": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
@@ -54,19 +56,12 @@ func RegistrationUser(writer http.ResponseWriter, request *http.Request) {
 	writer.WriteHeader(http.StatusCreated)
 }
 
-func GetRegistration(writer http.ResponseWriter, request *http.Request) {
-	if request.Method == "GET" {
-
-		// Отображение формы для ввода логина и пароля
-		bytes, _ := ioutil.ReadFile("/Users/basty64/Programming/go/src/nolabel-hac-auth-microservice-2024/docs/page.html")
-		fmt.Fprintf(writer, string(bytes))
-
-	} else if request.Method == "POST" {
-		// Обработка данных из формы
-		username := request.FormValue("username")
-		//password := request.FormValue("password")
-
-		// Вывод сообщения об успешной аутентификации
-		fmt.Fprintf(writer, "<h1>Hello, %s! You are now logged in.</h1>", username)
-	}
-}
+//1) По завершении регистрации отметьте учетную запись как неактивную (ожидает подтверждения) и создайте две строки из случайных символов.
+//
+//2) Сохраните обе строки в базе данных и свяжите их с пользователем.
+//
+//3) Отправьте пользователю ссылку по электронной почте, которая ведет на страницу вашего сайта и содержит обе строки.
+//
+//Пример: www.mysite.com/confirm.php?auth1=j0832r2&auth2=fji4j32ion
+//
+//4) Проверьте на своей странице, совпадают ли оба кода, и если да, пометьте учетную запись как активную.
