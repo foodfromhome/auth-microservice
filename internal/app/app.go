@@ -23,9 +23,8 @@ func (a *App) HTTPRouter() http.Handler {
 	router := mux.NewRouter()
 
 	//Функция обработчик
-	router.HandleFunc("/registration", handlers.RegistrationUser).Methods(http.MethodPost)
-	router.HandleFunc("/registrationtest", handlers.GetRegistration).Methods(http.MethodGet)
-	router.HandleFunc("/auth", handlers.AuthentificationUser).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/registration", handlers.RegistrationUser).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/authentification", handlers.AuthentificationUser).Methods(http.MethodPost)
 
 	a.router = router
 	return a.router

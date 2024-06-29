@@ -7,32 +7,38 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"nolabel-hac-auth-microservice-2024/internal/models"
+	"nolabel-hac-auth-microservice-2024/internal/service"
 	"time"
 )
 
 // Authentification endpoint
 func AuthentificationUser(writer http.ResponseWriter, request *http.Request) {
 
-	var user models.User
+	var auth models.Auth
 
-	err := json.NewDecoder(request.Body).Decode(&user)
+	err := json.NewDecoder(request.Body).Decode(&auth)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	HashedPassword := []byte("pkenorngeongren")
-	// Проверяем, соответствует ли введенный пароль хэшу
-	err = bcrypt.CompareHashAndPassword(HashedPassword, []byte(user.Password))
-	if err != nil {
-		fmt.Println("Неправильный пароль:", err)
-	}
+	//TO DO: create request
+	HashedPassword := []byte("requesttouserservice")
 
+	// Проверяем, соответствует ли введенный пароль хэшу
+	err = bcrypt.CompareHashAndPassword(HashedPassword, []byte(auth.Password))
+	if err != nil {
+		fmt.Println("Неправильный пароль")
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+	}
 	fmt.Println("Пароль верный! Вход разрешён")
+
+	auth.RoleName = service.CheckRole(auth.RoleName)
 
 	//secret jwt key generation
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":      user.Email,
+		"email":      auth.Email,
+		"operations": auth.RoleName.Operations,
 		"expiration": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
@@ -40,8 +46,9 @@ func AuthentificationUser(writer http.ResponseWriter, request *http.Request) {
 
 	writer.Header().Set("Authorization", tokenString)
 
-	response := "soooooo Good, bro"
-	err = json.NewEncoder(writer).Encode(response)
+	writer.Header().Set("Content-Type", "application/json")
+
+	err = json.NewEncoder(writer).Encode(models.AuthResponse{Auth: auth})
 	if err != nil {
 		print(err)
 	}
