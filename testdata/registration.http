@@ -2,7 +2,7 @@ POST localhost:8000/api/v1/registration
 Content-Type: application/json
 
 {
-  "Email": "ya@ha.ru",
+  "Email": "gg",
   "Name": "Yevgeniy",
   "Password": "jneoenen",
   "RoleName": "admin"

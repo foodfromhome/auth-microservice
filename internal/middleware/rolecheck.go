@@ -1,4 +1,4 @@
-package service
+package middleware
 
 import "nolabel-hac-auth-microservice-2024/internal/models"
 

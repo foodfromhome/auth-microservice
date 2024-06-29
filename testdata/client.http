@@ -1,0 +1,22 @@
+GET http://45.141.102.127:8090/api/users?email=ggg
+Content-Type: application/json
+
+{
+  "username": "Timur",
+  "password": "123",
+  "email": "ggg",
+  "role": "USER"
+}
+
+
+###
+
+POST http://45.141.102.127:8090/api/users?email=ggg
+Content-Type: application/json
+
+{
+"username": "Timur",
+"password": "123",
+"email": "ggg",
+"role": "USER"
+}

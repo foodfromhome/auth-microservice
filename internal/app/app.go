@@ -24,7 +24,7 @@ func (a *App) HTTPRouter() http.Handler {
 
 	//Функция обработчик
 	router.HandleFunc("/api/v1/registration", handlers.RegistrationUser).Methods(http.MethodPost)
-	router.HandleFunc("/api/v1/authentification", handlers.AuthentificationUser).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/authentification", handlers.AuthentificationUser).Methods(http.MethodGet)
 
 	a.router = router
 	return a.router

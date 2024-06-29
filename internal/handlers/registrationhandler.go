@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 	"nolabel-hac-auth-microservice-2024/internal/models"
-	"nolabel-hac-auth-microservice-2024/internal/service"
 	"time"
 )
 
@@ -23,37 +24,69 @@ func RegistrationUser(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	//TO DO: Проверка на то, что пользователя не существует в системе
+	url := fmt.Sprint("http://45.141.102.127:8090/api/users?email=", user.Email)
 
-	//password hashing
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
+	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Println("Ошибка при генерации хэша пароля:", err)
+		log.Println(err)
 	}
 
-	user.PasswordHash = string(hashedPassword)
-	user.Success = true
+	if resp.StatusCode == http.StatusOK {
+		writer.Header().Set("Registration", "User already registered")
 
-	//TO DO: add service methods
-	user.RoleName = service.CheckRole(user.RoleName)
+		writer.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	//secret jwt key generation
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":      user.Email,
-		"operations": user.RoleName.Operations,
-		"expiration": time.Now().Add(time.Hour * 24).Unix(),
-	})
+		err = json.NewEncoder(writer).Encode("user registered")
+		if err != nil {
+			print(err)
+		}
+		writer.WriteHeader(http.StatusCreated)
 
-	tokenString, _ := token.SignedString([]byte("secret_key"))
+	} else {
 
-	writer.Header().Set("Registration", tokenString)
+		//password hashing
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
+		if err != nil {
+			fmt.Println("Ошибка при генерации хэша пароля:", err)
+		}
 
-	writer.Header().Set("Content-Type", "application/json")
+		user.PasswordHash = string(hashedPassword)
 
-	err = json.NewEncoder(writer).Encode(models.UserResponse{User: user})
-	if err != nil {
-		print(err)
+		//TO DO: add service methods
+		//user.RoleName = middleware.CheckRole(user.Role)
+
+		//secret jwt key generation
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+			"email":      user.Email,
+			"operations": user.Role,
+			"expiration": time.Now().Add(time.Hour * 24).Unix(),
+		})
+
+		tokenString, _ := token.SignedString([]byte("secret_key"))
+
+		writer.Header().Set("Registration", tokenString)
+
+		writer.Header().Set("Content-Type", "application/json")
+
+		bytesRepresentation, err := json.Marshal(models.UserResponse{User: user})
+		if err != nil {
+			print(err)
+		}
+
+		writer.WriteHeader(http.StatusCreated)
+
+		url := fmt.Sprint("http://45.141.102.127:8090/api/users?email=", user.Email)
+
+		req, err := http.Post(url, "application/json", bytes.NewBuffer(bytesRepresentation))
+		if err != nil {
+			log.Println(err)
+		}
+		if req.StatusCode == http.StatusOK {
+			writer.Header().Set("Status", "success")
+		}
+
 	}
-	writer.WriteHeader(http.StatusCreated)
+
 }
 
 //1) По завершении регистрации отметьте учетную запись как неактивную (ожидает подтверждения) и создайте две строки из случайных символов.

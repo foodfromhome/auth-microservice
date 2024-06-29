@@ -7,5 +7,5 @@ type Auth struct {
 }
 
 type AuthResponse struct {
-	Auth Auth `json:"auth"`
+	Success bool `json:"success"`
 }

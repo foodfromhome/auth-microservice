@@ -7,7 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"nolabel-hac-auth-microservice-2024/internal/models"
-	"nolabel-hac-auth-microservice-2024/internal/service"
 	"time"
 )
 
@@ -33,8 +32,6 @@ func AuthentificationUser(writer http.ResponseWriter, request *http.Request) {
 	}
 	fmt.Println("Пароль верный! Вход разрешён")
 
-	auth.RoleName = service.CheckRole(auth.RoleName)
-
 	//secret jwt key generation
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email":      auth.Email,
@@ -48,7 +45,7 @@ func AuthentificationUser(writer http.ResponseWriter, request *http.Request) {
 
 	writer.Header().Set("Content-Type", "application/json")
 
-	err = json.NewEncoder(writer).Encode(models.AuthResponse{Auth: auth})
+	err = json.NewEncoder(writer).Encode(models.AuthResponse{Success: true})
 	if err != nil {
 		print(err)
 	}
